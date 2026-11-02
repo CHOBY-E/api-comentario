@@ -1,16 +1,15 @@
-org: ricardopalomino
 service: api-comentario
 
 provider:
   name: aws
-  runtime: python3.13	
-  # Default memory size for functions (default: 1024MB)
+  runtime: python3.13
   memorySize: 1024
   timeout: 20
   iam:
     role: arn:aws:iam::819135570819:role/LabRole
   environment:
     TABLE_NAME: ${sls:stage}-t_comentarios
+    BUCKET_NAME: ${sls:stage}-comentarios-ingesta-tunombre   # <-- NUEVO
 
 functions:
   crear:
@@ -38,5 +37,10 @@ resources:
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE
-        # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
+
+    # NUEVO: bucket de ingesta, uno por stage
+    BucketIngesta:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET_NAME}
